@@ -3,19 +3,17 @@ const http = require("http");
 const moment = require("moment");
 const date = require("date-and-time");
 var tiny = require("tiny-json-http");
-const cal = ical({
-  domain: "byu-broadcast-ical.herokuapp.com",
-  name: "BYU Sports Broadcast Events"
-});
+var schedule = require('node-schedule');
+var globalCal;
 const PORT = process.env.PORT || 5000;
 const pattern = date.compile("YYYY-MM-DD[T]HH:mm:ss");
 
-function retrieveCalendar(res) {
+async function updateCalendar() {
+  
   const cal = ical({
     domain: "byu-broadcast-ical.herokuapp.com",
     name: "BYU Sports Broadcast Events"
   });
-
   cal
     .prodId({
       company: "BYU",
@@ -34,7 +32,7 @@ function retrieveCalendar(res) {
       console.log("ruh roh!", err);
     } else {
       result.body.forEach(item => {
-        // console.log(item.title);
+        // console.log(`Adding ${item.title}`);
         var start = date.parse(item.field_event_date, pattern);
         cal.createEvent({
           uid: item.nid,
@@ -59,14 +57,20 @@ function retrieveCalendar(res) {
           url: item.field_tv === "" ? item.field_streaming_video : item.field_tv
         });
       });
+      globalCal = cal;
     }
   });
-  console.log("Created new iCal")
-  cal.serve(res);
 }
+
+updateCalendar();
+
+var j = schedule.scheduleJob('0 * * * *', function(){
+  updateCalendar();
+  console.log(`Updated iCal at ${date.format(new Date(), 'YYYY/MM/DD HH:MM:SS')}`);
+});
 
 http
   .createServer(function(req, res) {
-    retrieveCalendar(res);
+    globalCal.serve(res);
   })
   .listen(PORT, () => console.log(`Listening on ${PORT}`));
