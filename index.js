@@ -14,7 +14,7 @@ async function updateCalendar() {
   
   const cal = ical({
     domain: "byu-broadcast-ical.herokuapp.com",
-    name: "BYU Sports Broadcast Events"
+    name: "BYU Sports Broadcast Schedule"
   });
   cal
     .prodId({
