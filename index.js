@@ -1,3 +1,5 @@
+const tztool = require('./timezone.js');
+const jsonhelper = require('./json-helper.js');
 const ical = require("ical-generator");
 const http = require("http");
 const moment = require("moment");
@@ -6,7 +8,7 @@ var tiny = require("tiny-json-http");
 var schedule = require('node-schedule');
 var globalCal;
 const PORT = process.env.PORT || 5000;
-const pattern = date.compile("YYYY-MM-DD[T]HH:mm:ss");
+const pattern = date.compile("YYYY-MM-DD[T]HH:mm:ssZ");
 
 async function updateCalendar() {
   
@@ -31,9 +33,12 @@ async function updateCalendar() {
     if (err) {
       console.log("ruh roh!", err);
     } else {
-      result.body.forEach(item => {
+      var body = result.body;
+      var reducedBody = jsonhelper.dedup(body);
+      reducedBody.forEach(item => {
         // console.log(`Adding ${item.title}`);
-        var start = date.parse(item.field_event_date, pattern);
+        var offset = tztool.getTZOffset(item.field_tz);
+        var start = date.parse(item.field_event_date+offset, pattern);
         cal.createEvent({
           start: start,
           end: date.addHours(start, 3),
