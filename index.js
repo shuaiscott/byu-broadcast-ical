@@ -35,7 +35,6 @@ async function updateCalendar() {
         // console.log(`Adding ${item.title}`);
         var start = date.parse(item.field_event_date, pattern);
         cal.createEvent({
-          uid: item.nid,
           start: start,
           end: date.addHours(start, 3),
           summary: `${item.title} - ${item.field_sport}`,
