@@ -27,7 +27,7 @@ async function updateCalendar() {
     .timezone("America/Denver")
     .ttl(60 * 60 * 24);
 
-  var url = "https://byucougars.com/dl/feeds/broadcast-schedule";
+  var url = "https://byucougars.com/jsonapi/node/sporting_event?filter[event-date-filter][condition][path]=field_event_date&filter[event-date-filter][condition][operator]=%3E&filter[event-date-filter][condition][value]=2021";
 
   tiny.get({ url }, function _get(err, result) {
     if (err) {
